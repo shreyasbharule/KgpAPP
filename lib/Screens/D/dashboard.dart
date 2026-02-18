@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:login_app_page/Screens/D/maps.dart';
 import 'package:login_app_page/Screens/D/academic_calendar.dart';
 import 'package:login_app_page/Screens/D/events.dart';
+import 'package:login_app_page/Screens/D/timetable_calendar.dart';
 
 final Uri lib = Uri.parse('https://library.iitkgp.ac.in/');
 final Uri erp = Uri.parse('https://erp.iitkgp.ac.in/');
@@ -95,6 +96,14 @@ class Dashboard extends StatelessWidget {
                     );
                   },
                 ),
+                buildButton(context, "Timetable & iCal", () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TimetableCalendarPage(),
+                    ),
+                  );
+                }, backgroundColor: const Color.fromARGB(255, 40, 70, 94)),
               ],
             ),
           ),

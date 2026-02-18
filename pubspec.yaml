@@ -41,6 +41,8 @@ dependencies:
   path_provider: ^2.0.15
   flutter_pdfview: ^1.3.2
   syncfusion_flutter_pdfviewer: ^25.1.42
+  geolocator: ^12.0.0
+  table_calendar: ^3.1.2
 
 dev_dependencies:
   flutter_test:
