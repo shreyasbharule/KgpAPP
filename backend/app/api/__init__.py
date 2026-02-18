@@ -1,3 +1,3 @@
-from app.api import auth, student
+from app.api import admin, auth, student
 
-__all__ = ['auth', 'student']
+__all__ = ['auth', 'student', 'admin']

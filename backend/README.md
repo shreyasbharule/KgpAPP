@@ -1,39 +1,86 @@
-# University Student API (MVP Scaffold)
+# University Student API (Backend Scaffold)
 
-Security-focused FastAPI backend scaffold that provides authentication, RBAC, student data endpoints, and audit logging.
+Security-focused FastAPI backend scaffold aligned with the OpenAPI contract baseline.
 
-## Features
+## Included capabilities
 
-- JWT authentication (`/api/v1/auth/login`)
-- Role-based access control for student and admin/staff endpoints
-- Audit logging for login and profile reads
-- PostgreSQL schema migration scripts
-- Environment-based configuration (no hardcoded secrets)
+- Environment-based configuration with `.env` values only (no secrets hardcoded).
+- Docker Compose stack for backend + PostgreSQL.
+- Authentication (`/api/v1/auth/login`) with bcrypt password verification.
+- Authorization guards with role-based access control (student/staff/admin).
+- Global request rate limiting middleware.
+- Basic login abuse protection (temporary block after repeated failures).
+- Input validation for endpoint payloads and path parameters.
+- Audit logging for sensitive actions:
+  - Login success/failure/block
+  - Admin role changes
+  - Student record access
+  - Grade view
+- Unit tests for auth + RBAC + student endpoint.
 
-## Local Run
+## Folder structure
+
+```text
+backend/
+├── app/
+│   ├── api/
+│   │   ├── admin.py
+│   │   ├── auth.py
+│   │   ├── deps.py
+│   │   └── student.py
+│   ├── core/
+│   │   ├── config.py
+│   │   └── security.py
+│   ├── db/session.py
+│   ├── middleware/rate_limiter.py
+│   ├── models/
+│   ├── schemas/
+│   ├── services/
+│   │   ├── abuse_protection.py
+│   │   └── audit.py
+│   └── main.py
+├── migrations/
+├── openapi/university-api.v1.yaml
+├── tests/
+├── docker-compose.yml
+├── Dockerfile
+└── .env.template
+```
+
+## Run with Docker Compose
+
+```bash
+cd backend
+cp .env.template .env
+docker compose up --build
+```
+
+API base URL: `http://localhost:8000`
+
+### Apply SQL migrations in Docker
+
+```bash
+docker compose exec -T postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < migrations/001_init.sql
+docker compose exec -T postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < migrations/002_seed_admin.sql
+```
+
+## Run locally (without Docker)
 
 ```bash
 cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
-# update JWT_SECRET_KEY and DATABASE_URL in .env
+cp .env.template .env
+# set DATABASE_URL for your local postgres if needed
 psql "$DATABASE_URL" -f migrations/001_init.sql
 psql "$DATABASE_URL" -f migrations/002_seed_admin.sql
 uvicorn app.main:app --reload --port 8000
 ```
 
-## Security Notes
+## Run tests
 
-- Use HTTPS in all non-local environments.
-- Rotate and manage JWT secret via a secret manager.
-- Keep access token lifetime short and add refresh tokens before production.
-- Restrict CORS origins to trusted university domains.
-- Store audit logs in append-only storage for compliance workflows.
-
-## API and Schema Design Artifacts
-
-- OpenAPI 3.0 spec: `openapi/university-api.v1.yaml`
-- Expanded PostgreSQL schema migration: `migrations/003_platform_expansion.sql`
-- Migration approach (Alembic): `docs/migration_strategy.md`
+```bash
+cd backend
+pytest -q
+```
