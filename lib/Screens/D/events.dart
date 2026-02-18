@@ -18,13 +18,11 @@ class EventsPage extends StatelessWidget {
             height: 1000,
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage(
-                    'assets/images/bg.jpg'), // Replace 'background_image.jpeg' with your image asset
+                image: AssetImage('assets/images/bg.jpg'),
                 fit: BoxFit.cover,
               ),
             ),
-            child: Stack(children: [
-              SingleChildScrollView(
+            child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -44,11 +42,10 @@ class EventsPage extends StatelessWidget {
                     buildButton(context, "Inter IIT", 0, () {
                       _interiit();
                     }),
-                    // We can add more locations or functionalities as needed
                   ],
                 ),
               ),
-            ])));
+            ));
   }
 }
 
@@ -93,7 +90,7 @@ void _sf(BuildContext context) {
             ElevatedButton(
               onPressed: () {
                 _sfweb();
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: const Text("Website"),
             ),
@@ -101,7 +98,7 @@ void _sf(BuildContext context) {
             ElevatedButton(
               onPressed: () {
                 _sffb();
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: const Text("Facebook"),
             ),
@@ -109,7 +106,7 @@ void _sf(BuildContext context) {
             ElevatedButton(
               onPressed: () {
                 _sfinsta();
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: const Text("Instagram"),
             ),
@@ -171,7 +168,7 @@ void _shourya(BuildContext context) {
             ElevatedButton(
               onPressed: () {
                 _shweb();
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: const Text("Website"),
             ),
@@ -179,7 +176,7 @@ void _shourya(BuildContext context) {
             ElevatedButton(
               onPressed: () {
                 _shfb();
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: const Text("Facebook"),
             ),
@@ -187,7 +184,7 @@ void _shourya(BuildContext context) {
             ElevatedButton(
               onPressed: () {
                 _shinsta();
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: const Text("Instagram"),
             ),

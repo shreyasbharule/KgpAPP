@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-// import 'package:login_app_page/Screens/Welcome/components/quicklink.dart';
-// import 'package:login_app_page/constants.dart';
 import '../../components/background.dart';
 import '../../responsive.dart';
 import 'components/login_signup_btn.dart';
-// import 'components/quicklink.dart';
 import 'components/welcome_image.dart';
 
 class WelcomeScreen extends StatelessWidget {

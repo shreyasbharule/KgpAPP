@@ -18,25 +18,21 @@ class MapsPage extends StatelessWidget {
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 5, 115, 134),
-        title: const Text("MAPS"),
+        title: const Text('MAPS'),
       ),
       body: Stack(
         children: [
-          // Background Image with ColorFilter to make it lighter
           Positioned.fill(
             child: ColorFiltered(
               colorFilter: ColorFilter.mode(
-                Colors.white.withOpacity(
-                    0.6), // Adjust the opacity to control the lightness
+                Colors.white.withOpacity(0.6),
                 BlendMode.lighten,
               ),
               child: Image.asset(
-                'assets/images/logo.png', // Replace 'background_image.jpg' with your image asset
+                'assets/images/logo.png',
                 fit: BoxFit.contain,
-                width: MediaQuery.of(context).size.width *
-                    0.4, // Adjust the width to make the logo smaller
-                height: MediaQuery.of(context).size.height *
-                    0.2, // Set the height of the logo
+                width: MediaQuery.of(context).size.width * 0.4,
+                height: MediaQuery.of(context).size.height * 0.2,
               ),
             ),
           ),
@@ -44,19 +40,18 @@ class MapsPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                buildButton(context, "BC Roy Hospital", 0, () {
+                buildButton(context, 'BC Roy Hospital', 0, () {
                   _showBCRoyDetails(context);
                 }),
-                buildButton(context, "Main Building", 1, () {
+                buildButton(context, 'Main Building', 1, () {
                   _launchMap2();
                 }),
-                buildButton(context, "Police Station", 0, () {
+                buildButton(context, 'Police Station', 0, () {
                   _launchMap3();
                 }),
-                buildButton(context, "View Doctor Availability", 1, () {
+                buildButton(context, 'View Doctor Availability', 1, () {
                   _viewPDF(context);
                 }),
-                // Add more locations or functionalities as needed
               ],
             ),
           ),
@@ -114,18 +109,19 @@ class MapsPage extends StatelessWidget {
 
   void _viewPDF(BuildContext context) {
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text(
-                'BC Roy Hospital Doctor Availibilty',
-                style: TextStyle(fontSize: 20),
-              ),
+      context: context,
+      builder: (BuildContext context) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text(
+              'BC Roy Hospital Doctor Availibilty',
+              style: TextStyle(fontSize: 20),
             ),
-            body: SfPdfViewer.asset('assets/pdfs/bcroy.pdf'),
-          );
-        });
+          ),
+          body: SfPdfViewer.asset('assets/pdfs/bcroy.pdf'),
+        );
+      },
+    );
   }
 
   void _showBCRoyDetails(BuildContext context) {
@@ -133,18 +129,18 @@ class MapsPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("BC Roy Hospital"),
+          title: const Text('BC Roy Hospital'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text("Contact: 03222 255 221"),
+              const Text('Contact: 03222 255 221'),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   _launchMap1();
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop();
                 },
-                child: const Text("View Map"),
+                child: const Text('View Map'),
               ),
             ],
           ),
