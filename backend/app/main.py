@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import admin, auth, student
+from app.api import admin, auth, public, student
 from app.core.config import get_settings
 from app.middleware.rate_limiter import RateLimiterMiddleware
 
@@ -30,4 +30,5 @@ def health_check():
 
 app.include_router(auth.router, prefix='/api/v1')
 app.include_router(student.router, prefix='/api/v1')
+app.include_router(public.router, prefix='/api/v1')
 app.include_router(admin.router, prefix='/api/v1')

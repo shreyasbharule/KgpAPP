@@ -6,10 +6,14 @@ class LoginScreen extends StatefulWidget {
     super.key,
     required this.authService,
     required this.onLoggedIn,
+    required this.demoMode,
+    required this.onToggleDemoMode,
   });
 
   final AuthService authService;
   final VoidCallback onLoggedIn;
+  final bool demoMode;
+  final ValueChanged<bool> onToggleDemoMode;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -18,7 +22,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController(text: 'student@university.edu');
-  final _passwordController = TextEditingController(text: 'ChangeMe123!');
+  final _passwordController = TextEditingController(text: 'StudentPass123!');
   bool _loading = false;
   String? _error;
 
@@ -69,11 +73,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Sign in to continue (${DateTime.now().year})',
+                      widget.demoMode ? 'Demo Mode enabled' : 'Live backend mode',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    const SizedBox(height: 24),
+                    SwitchListTile(
+                      value: widget.demoMode,
+                      onChanged: widget.onToggleDemoMode,
+                      title: const Text('Demo Mode'),
+                      subtitle: const Text('Use local fixture data instead of backend APIs'),
+                    ),
+                    const SizedBox(height: 12),
                     TextFormField(
                       controller: _emailController,
                       decoration: const InputDecoration(labelText: 'Institutional email'),
@@ -104,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 10),
                     const Text(
-                      'Use admin@university.edu to preview admin controls.',
+                      'Demo users: student@university.edu / StudentPass123!,\nfaculty@university.edu / FacultyPass123!, admin@university.edu / AdminPass123!',
                       textAlign: TextAlign.center,
                     )
                   ],

@@ -22,13 +22,17 @@ class UniversityStudentApp extends StatefulWidget {
 }
 
 class _UniversityStudentAppState extends State<UniversityStudentApp> {
+  static const _demoModeKey = 'demo_mode_enabled';
+
   late final SecureTokenStore _tokenStore;
   late final SessionManager _sessionManager;
   late final ApiClient _apiClient;
   late final AuthService _authService;
   InstitutionService? _institutionService;
   StudentService? _studentService;
+  SharedPreferences? _prefs;
   bool _bootstrapped = false;
+  bool _demoMode = false;
 
   @override
   void initState() {
@@ -55,15 +59,19 @@ class _UniversityStudentAppState extends State<UniversityStudentApp> {
   }
 
   Future<void> _bootstrap() async {
-    final prefs = await SharedPreferences.getInstance();
-    _institutionService = InstitutionService(PublicCacheStore(prefs));
-    _studentService = StudentService(StudentCacheStore());
+    _prefs = await SharedPreferences.getInstance();
+    _demoMode = _prefs?.getBool(_demoModeKey) ?? false;
+    _authService.demoMode = _demoMode;
+
+    _institutionService = InstitutionService(PublicCacheStore(_prefs!), _apiClient)
+      ..demoMode = _demoMode;
+    _studentService = StudentService(StudentCacheStore(), _apiClient)..demoMode = _demoMode;
 
     final savedTokens = await _tokenStore.readSession();
     if (savedTokens != null) {
       final placeholderUser = AppUser(
         id: 'saved-user',
-        name: 'Returning Student',
+        name: 'Returning User',
         email: 'student@university.edu',
         role: UserRole.student,
       );
@@ -72,6 +80,17 @@ class _UniversityStudentAppState extends State<UniversityStudentApp> {
 
     if (mounted) {
       setState(() => _bootstrapped = true);
+    }
+  }
+
+  Future<void> _setDemoMode(bool value) async {
+    _demoMode = value;
+    await _prefs?.setBool(_demoModeKey, value);
+    _authService.demoMode = value;
+    _institutionService?.demoMode = value;
+    _studentService?.demoMode = value;
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -97,6 +116,8 @@ class _UniversityStudentAppState extends State<UniversityStudentApp> {
           home: _sessionManager.currentSession == null
               ? LoginScreen(
                   authService: _authService,
+                  demoMode: _demoMode,
+                  onToggleDemoMode: _setDemoMode,
                   onLoggedIn: () => setState(() {}),
                 )
               : HomeShell(
