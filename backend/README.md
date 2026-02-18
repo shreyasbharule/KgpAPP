@@ -31,3 +31,9 @@ uvicorn app.main:app --reload --port 8000
 - Keep access token lifetime short and add refresh tokens before production.
 - Restrict CORS origins to trusted university domains.
 - Store audit logs in append-only storage for compliance workflows.
+
+## API and Schema Design Artifacts
+
+- OpenAPI 3.0 spec: `openapi/university-api.v1.yaml`
+- Expanded PostgreSQL schema migration: `migrations/003_platform_expansion.sql`
+- Migration approach (Alembic): `docs/migration_strategy.md`

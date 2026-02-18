@@ -1,0 +1,1007 @@
+openapi: 3.0.3
+info:
+  title: University Student Platform API
+  version: 1.0.0
+  description: |
+    API contract for authentication, institutional public information,
+    student services, administration, and audit logging.
+servers:
+  - url: https://api.university.example.com/api/v1
+    description: Production
+  - url: http://localhost:8000/api/v1
+    description: Local development
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Public Info
+  - name: Student
+  - name: Admin
+  - name: Audit
+paths:
+  /auth/invites:
+    post:
+      tags: [Auth]
+      summary: Invite a user to register (admin/staff)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteCreateRequest'
+      responses:
+        '201':
+          description: Invite created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Complete registration via invite token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email + password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPairResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Exchange refresh token for new access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPairResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoke active refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '204':
+          description: Logged out
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Request password reset
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '202':
+          description: Accepted
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Reset password using reset token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, newPassword]
+              properties:
+                token:
+                  type: string
+                newPassword:
+                  type: string
+                  minLength: 8
+      responses:
+        '204':
+          description: Password reset
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+  /auth/mfa/enroll:
+    post:
+      tags: [Auth]
+      summary: Enroll user for TOTP MFA (stub)
+      responses:
+        '200':
+          description: Enrollment details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mfaEnrollmentId:
+                    type: string
+                    format: uuid
+                  otpauthUri:
+                    type: string
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+  /auth/mfa/verify:
+    post:
+      tags: [Auth]
+      summary: Verify MFA challenge (stub)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mfaEnrollmentId, code]
+              properties:
+                mfaEnrollmentId:
+                  type: string
+                  format: uuid
+                code:
+                  type: string
+                  minLength: 6
+                  maxLength: 8
+      responses:
+        '204':
+          description: MFA verified
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+  /public/departments:
+    get:
+      tags: [Public Info]
+      summary: List departments
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Search by department name/code
+      responses:
+        '200':
+          description: Paginated departments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDepartmentsResponse'
+  /public/contacts:
+    get:
+      tags: [Public Info]
+      summary: List public contact directory
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [office, support, admissions, emergency]
+      responses:
+        '200':
+          description: Paginated contacts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedContactsResponse'
+  /public/notices:
+    get:
+      tags: [Public Info]
+      summary: List notices
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: audience
+          in: query
+          schema:
+            type: string
+            enum: [public, student, faculty, staff]
+        - name: publishedFrom
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Paginated notices
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNoticesResponse'
+  /public/events:
+    get:
+      tags: [Public Info]
+      summary: List institutional events
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: startsAfter
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: departmentId
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEventsResponse'
+  /public/emergency-contacts:
+    get:
+      tags: [Public Info]
+      summary: List emergency contacts
+      security: []
+      responses:
+        '200':
+          description: Emergency contacts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EmergencyContact'
+  /student/profile:
+    get:
+      tags: [Student]
+      summary: Retrieve student profile
+      responses:
+        '200':
+          description: Profile details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StudentProfile'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+  /student/timetable:
+    get:
+      tags: [Student]
+      summary: Retrieve student timetable
+      parameters:
+        - name: weekStart
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Timetable rows
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TimetableEntry'
+  /student/grades:
+    get:
+      tags: [Student]
+      summary: Retrieve grades by term
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: term
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated grade history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGradesResponse'
+  /student/attendance:
+    get:
+      tags: [Student]
+      summary: Retrieve attendance records
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: courseCode
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated attendance records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAttendanceResponse'
+  /student/fees:
+    get:
+      tags: [Student]
+      summary: Retrieve fee invoices/status
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, paid, overdue, waived]
+      responses:
+        '200':
+          description: Fee records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FeeRecord'
+  /student/library-status:
+    get:
+      tags: [Student]
+      summary: Retrieve library account state
+      responses:
+        '200':
+          description: Library account details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/LibraryStatus'
+  /admin/notices:
+    post:
+      tags: [Admin]
+      summary: Create notice
+      responses:
+        '201':
+          description: Notice created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Notice'
+  /admin/notices/{noticeId}:
+    patch:
+      tags: [Admin]
+      summary: Update notice
+      parameters:
+        - name: noticeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Notice updated
+    delete:
+      tags: [Admin]
+      summary: Delete notice
+      parameters:
+        - name: noticeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Notice deleted
+  /admin/events:
+    post:
+      tags: [Admin]
+      summary: Create event
+      responses:
+        '201':
+          description: Event created
+  /admin/events/{eventId}:
+    patch:
+      tags: [Admin]
+      summary: Update event
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Event updated
+    delete:
+      tags: [Admin]
+      summary: Delete event
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Event deleted
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: List users
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: role
+          in: query
+          schema:
+            $ref: '#/components/schemas/UserRole'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, pending_invite, suspended]
+      responses:
+        '200':
+          description: Paginated users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUsersResponse'
+    post:
+      tags: [Admin]
+      summary: Create user directly (admin)
+      responses:
+        '201':
+          description: User created
+  /admin/users/{userId}/roles:
+    patch:
+      tags: [Admin]
+      summary: Update user role
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  $ref: '#/components/schemas/UserRole'
+      responses:
+        '200':
+          description: Role updated
+  /admin/audit-logs:
+    get:
+      tags: [Audit]
+      summary: List audit logs (admin-only)
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: actorUserId
+          in: query
+          schema:
+            type: integer
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Paginated audit logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditLogsResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: refresh_token
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+  responses:
+    ErrorResponse:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    UserRole:
+      type: string
+      enum: [student, faculty, staff, admin]
+    MetaPagination:
+      type: object
+      required: [page, pageSize, totalItems, totalPages]
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  issue:
+                    type: string
+            traceId:
+              type: string
+              format: uuid
+    InviteCreateRequest:
+      type: object
+      required: [email, role]
+      properties:
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/UserRole'
+        expiresInHours:
+          type: integer
+          minimum: 1
+          default: 72
+    InviteResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            inviteId:
+              type: string
+              format: uuid
+            email:
+              type: string
+              format: email
+            expiresAt:
+              type: string
+              format: date-time
+    RegisterRequest:
+      type: object
+      required: [inviteToken, fullName, password]
+      properties:
+        inviteToken:
+          type: string
+        fullName:
+          type: string
+        password:
+          type: string
+          minLength: 8
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+    TokenPairResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            accessToken:
+              type: string
+            refreshToken:
+              type: string
+            expiresIn:
+              type: integer
+    UserResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+        status:
+          type: string
+          enum: [active, pending_invite, suspended]
+    Department:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        name:
+          type: string
+        officeLocation:
+          type: string
+    Contact:
+      type: object
+      properties:
+        id:
+          type: integer
+        departmentId:
+          type: integer
+          nullable: true
+        type:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+    Notice:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        body:
+          type: string
+        audience:
+          type: string
+        isPublished:
+          type: boolean
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        venue:
+          type: string
+        departmentId:
+          type: integer
+          nullable: true
+    EmergencyContact:
+      type: object
+      properties:
+        id:
+          type: integer
+        serviceName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+          nullable: true
+        priority:
+          type: integer
+    StudentProfile:
+      type: object
+      properties:
+        studentId:
+          type: integer
+        rollNumber:
+          type: string
+        fullName:
+          type: string
+        department:
+          type: string
+        semester:
+          type: integer
+        program:
+          type: string
+    TimetableEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        courseCode:
+          type: string
+        courseName:
+          type: string
+        instructor:
+          type: string
+        room:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+    GradeRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        term:
+          type: string
+        courseCode:
+          type: string
+        credits:
+          type: integer
+        grade:
+          type: string
+    AttendanceRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        courseCode:
+          type: string
+        attendedClasses:
+          type: integer
+        totalClasses:
+          type: integer
+        attendancePercent:
+          type: number
+          format: float
+    FeeRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        invoiceNo:
+          type: string
+        amountDue:
+          type: number
+          format: float
+        dueDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [pending, paid, overdue, waived]
+    LibraryStatus:
+      type: object
+      properties:
+        cardNumber:
+          type: string
+        outstandingFine:
+          type: number
+          format: float
+        issuedBooksCount:
+          type: integer
+        overdueBooksCount:
+          type: integer
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        actorUserId:
+          type: integer
+          nullable: true
+        action:
+          type: string
+        resource:
+          type: string
+        resourceId:
+          type: string
+          nullable: true
+        ipAddress:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties: true
+    PaginatedDepartmentsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Department'
+        meta:
+          $ref: '#/components/schemas/MetaPagination'
+    PaginatedContactsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+        meta:
+          $ref: '#/components/schemas/MetaPagination'
+    PaginatedNoticesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notice'
+        meta:
+          $ref: '#/components/schemas/MetaPagination'
+    PaginatedEventsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+        meta:
+          $ref: '#/components/schemas/MetaPagination'
+    PaginatedGradesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GradeRecord'
+        meta:
+          $ref: '#/components/schemas/MetaPagination'
+    PaginatedAttendanceResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttendanceRecord'
+        meta:
+          $ref: '#/components/schemas/MetaPagination'
+    PaginatedUsersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        meta:
+          $ref: '#/components/schemas/MetaPagination'
+    PaginatedAuditLogsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLog'
+        meta:
+          $ref: '#/components/schemas/MetaPagination'
