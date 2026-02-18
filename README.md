@@ -5,6 +5,7 @@ Production-oriented scaffold for a university mobile application and secure back
 ## Deliverables Included
 
 - Architecture overview and threat model: `docs/architecture.md`
+- Technology stack decision and security defaults: `docs/stack-decision.md`
 - Flutter mobile app scaffold with modular structure and secure token storage.
 - FastAPI backend scaffold with JWT auth, RBAC, and audit logging.
 - PostgreSQL SQL migration scripts under `backend/migrations/`.
