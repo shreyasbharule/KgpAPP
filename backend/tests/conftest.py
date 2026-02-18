@@ -10,7 +10,9 @@ os.environ.setdefault('JWT_SECRET_KEY', 'test-secret-key-with-at-least-thirty-tw
 from app.core.security import get_password_hash
 from app.db.session import Base, SessionLocal, engine
 from app.main import app
-from app.models.student import StudentGrade, StudentProfile
+from datetime import datetime, timedelta
+
+from app.models.student import StudentGrade, StudentProfile, StudentTimetableEntry
 from app.models.user import Role, User
 
 
@@ -58,8 +60,21 @@ def setup_database() -> Generator[None, None, None]:
             StudentGrade(
                 student_id=student_profile.id,
                 course_code='CS60001',
+                course_name='Distributed Systems',
                 term='Spring-2026',
                 grade='A',
+                credits=4,
+            )
+        )
+        db.add(
+            StudentTimetableEntry(
+                student_id=student_profile.id,
+                course_code='CS60001',
+                course_name='Distributed Systems',
+                instructor_name='Dr. Test',
+                room='CS-501',
+                starts_at=datetime.utcnow() + timedelta(days=1),
+                ends_at=datetime.utcnow() + timedelta(days=1, hours=1),
             )
         )
         db.commit()

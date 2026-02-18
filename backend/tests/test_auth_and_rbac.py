@@ -32,3 +32,15 @@ def test_rbac_blocks_student_from_admin_student_lookup(client):
     )
 
     assert response.status_code == 403
+
+
+def test_refresh_returns_new_access_token(client):
+    login = client.post('/api/v1/auth/login', json={'email': 'student@test.edu', 'password': 'StudentPass123!'})
+    refresh_token = login.json()['refresh_token']
+
+    response = client.post('/api/v1/auth/refresh', json={'refresh_token': refresh_token})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload['access_token']
+    assert payload['refresh_token']

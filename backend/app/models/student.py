@@ -23,8 +23,23 @@ class StudentGrade(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     student_id: Mapped[int] = mapped_column(ForeignKey('student_profiles.id', ondelete='CASCADE'), index=True)
     course_code: Mapped[str] = mapped_column(String(20), nullable=False)
+    course_name: Mapped[str | None] = mapped_column(String(150), nullable=True)
     term: Mapped[str] = mapped_column(String(40), nullable=False)
     grade: Mapped[str] = mapped_column(String(4), nullable=False)
+    credits: Mapped[int] = mapped_column(default=0)
+
+
+class StudentTimetableEntry(Base):
+    __tablename__ = 'student_timetable_entries'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    student_id: Mapped[int] = mapped_column(ForeignKey('student_profiles.id', ondelete='CASCADE'), index=True)
+    course_code: Mapped[str] = mapped_column(String(20), nullable=False)
+    course_name: Mapped[str] = mapped_column(String(150), nullable=False)
+    instructor_name: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    room: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class FeeStatus(Base):

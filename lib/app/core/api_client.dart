@@ -23,7 +23,7 @@ class ApiResponse {
   ApiResponse({required this.statusCode, required this.body});
 
   final int statusCode;
-  final Map<String, dynamic> body;
+  final dynamic body;
 }
 
 abstract class ApiInterceptor {
@@ -128,7 +128,10 @@ class ApiClient {
     }
 
     if (processed.statusCode >= 400) {
-      throw Exception(processed.body['message'] ?? 'Request failed');
+      if (processed.body is Map<String, dynamic>) {
+        throw Exception((processed.body as Map<String, dynamic>)['message'] ?? (processed.body as Map<String, dynamic>)['detail'] ?? 'Request failed');
+      }
+      throw Exception('Request failed');
     }
 
     return processed;
@@ -151,9 +154,7 @@ class ApiClient {
         throw UnsupportedError('Unsupported method ${request.method}');
     }
 
-    final decoded = raw.body.isEmpty
-        ? <String, dynamic>{}
-        : jsonDecode(raw.body) as Map<String, dynamic>;
+    final decoded = raw.body.isEmpty ? <String, dynamic>{} : jsonDecode(raw.body);
 
     return ApiResponse(statusCode: raw.statusCode, body: decoded);
   }

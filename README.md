@@ -69,7 +69,8 @@ pip install -r requirements.txt
 cp .env.example .env
 # update DATABASE_URL and JWT_SECRET_KEY
 psql "$DATABASE_URL" -f migrations/001_init.sql
-psql "$DATABASE_URL" -f migrations/002_seed_admin.sql
+psql "$DATABASE_URL" -f migrations/003_platform_expansion.sql
+psql "$DATABASE_URL" -f migrations/004_seed_demo_data.sql
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -93,3 +94,8 @@ curl http://localhost:8000/health
 
 - University can later integrate SIS/LMS/Library via service adapters in backend.
 - Current build is MVP scaffold ready for integration hardening and CI/CD.
+
+
+## Demo Mode (Mobile)
+
+Use the **Demo Mode** toggle on the login screen to run the app without backend connectivity for local UI testing. Turn it off to use real backend APIs.
