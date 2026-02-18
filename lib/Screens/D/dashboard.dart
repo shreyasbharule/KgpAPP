@@ -14,8 +14,7 @@ class Dashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(
-          255, 36, 82, 90), // Make the scaffold background transparent
+      backgroundColor: const Color.fromARGB(255, 36, 82, 90),
       appBar: AppBar(
         leading: BackButton(
           onPressed: () {
@@ -27,36 +26,27 @@ class Dashboard extends StatelessWidget {
             );
           },
         ),
-        backgroundColor: const Color.fromARGB(
-            255, 5, 115, 134), // Make the app bar background transparent
+        backgroundColor: const Color.fromARGB(255, 5, 115, 134),
         title: const Text(
-          "KGP STUDENT APP",
+          'KGP STUDENT APP',
         ),
       ),
       body: Stack(
         children: [
-          const SizedBox(
-            height: 5000,
-          ),
-          // Background Image with ColorFilter to make it lighter
           Positioned.fill(
             child: ColorFiltered(
               colorFilter: ColorFilter.mode(
-                Colors.white.withOpacity(
-                    0.6), // Adjust the opacity to control the lightness
+                Colors.white.withOpacity(0.6),
                 BlendMode.lighten,
               ),
               child: Image.asset(
-                'assets/images/logo.png', // Replace 'background_image.jpg' with your image asset
+                'assets/images/logo.png',
                 fit: BoxFit.contain,
-                width: MediaQuery.of(context).size.width *
-                    0.4, // Adjust the width to make the logo smaller
-                height: MediaQuery.of(context).size.height *
-                    0.2, // Set the height of the logo
+                width: MediaQuery.of(context).size.width * 0.4,
+                height: MediaQuery.of(context).size.height * 0.2,
               ),
             ),
           ),
-          // Content
           SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,7 +54,7 @@ class Dashboard extends StatelessWidget {
                 const SizedBox(
                   height: 170,
                 ),
-                buildButton(context, "Academic Calendar", () {
+                buildButton(context, 'Academic Calendar', () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -72,7 +62,7 @@ class Dashboard extends StatelessWidget {
                     ),
                   );
                 }),
-                buildButton(context, "Events", () {
+                buildButton(context, 'Events', () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -80,12 +70,12 @@ class Dashboard extends StatelessWidget {
                     ),
                   );
                 }, backgroundColor: const Color.fromARGB(255, 40, 70, 94)),
-                buildButton(context, "ERP", _launchERP),
-                buildButton(context, "Library Resources", _launchLib,
+                buildButton(context, 'ERP', _launchERP),
+                buildButton(context, 'Library Resources', _launchLib,
                     backgroundColor: const Color.fromARGB(255, 40, 70, 94)),
                 buildButton(
                   context,
-                  "Maps",
+                  'Maps',
                   () {
                     Navigator.push(
                       context,

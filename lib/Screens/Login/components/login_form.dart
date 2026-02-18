@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:login_app_page/Screens/D/dashboard.dart';
-// import 'package:login_app_page/Screens/Login/login_screen.dart';
 
 import '../../../components/already_have_an_account_acheck.dart';
 import '../../../constants.dart';
@@ -18,7 +17,7 @@ class LoginForm extends StatelessWidget {
         children: [
           TextFormField(
             decoration: const InputDecoration(
-              hintText: "Your email",
+              hintText: 'Your email',
               prefixIcon: Padding(
                 padding: EdgeInsets.all(defaultPadding),
                 child: Icon(Icons.person),
@@ -36,7 +35,7 @@ class LoginForm extends StatelessWidget {
               obscureText: true,
               cursorColor: kPrimaryColor,
               decoration: const InputDecoration(
-                hintText: "Your password",
+                hintText: 'Your password',
                 prefixIcon: Padding(
                   padding: EdgeInsets.all(defaultPadding),
                   child: Icon(Icons.lock),
@@ -46,7 +45,7 @@ class LoginForm extends StatelessWidget {
           ),
           const SizedBox(height: defaultPadding),
           Hero(
-            tag: "login_btn",
+            tag: 'login_btn',
             child: ElevatedButton(
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
@@ -54,12 +53,11 @@ class LoginForm extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (context) => const Dashboard(),
                   ),
-                  (route) =>
-                      false, // Remove all routes from the navigation stack
+                  (route) => false,
                 );
               },
               child: Text(
-                "Login".toUpperCase(),
+                'Login'.toUpperCase(),
               ),
             ),
           ),
