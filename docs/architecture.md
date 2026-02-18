@@ -56,3 +56,7 @@
 - Add rate limiting and bot/abuse detection.
 - Add field-level encryption for highly sensitive columns.
 - Add SIEM integration and immutable audit pipeline.
+
+## 4) Security Policy Reference
+
+- RBAC, data classification, retention, and endpoint authorization policy: `docs/security/rbac_and_data_governance.md`.
