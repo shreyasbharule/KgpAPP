@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:login_app_page/app/core/api_client.dart';
-import 'package:login_app_page/app/core/secure_token_store.dart';
 import 'package:login_app_page/app/features/auth/auth_service.dart';
-import 'package:login_app_page/app/features/dashboard/home_shell.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({
+    super.key,
+    required this.authService,
+    required this.onLoggedIn,
+  });
+
+  final AuthService authService;
+  final VoidCallback onLoggedIn;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -26,19 +30,15 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
 
-    final tokenStore = SecureTokenStore();
-    final apiClient = ApiClient(tokenStore);
-    final authService = AuthService(apiClient, tokenStore);
-
     try {
-      await authService.login(_emailController.text.trim(), _passwordController.text);
-      if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeShell()),
+      await widget.authService.login(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
+      widget.onLoggedIn();
     } catch (_) {
       setState(() {
-        _error = 'Unable to sign in. Verify credentials or contact the university help desk.';
+        _error = 'Unable to sign in. Verify credentials or contact support.';
       });
     } finally {
       if (mounted) {
@@ -62,15 +62,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
+                    Text(
                       'University Student App',
-                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Secure student access portal',
+                    const SizedBox(height: 8),
+                    Text(
+                      'Sign in to continue (${DateTime.now().year})',
                       textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 24),
                     TextFormField(
@@ -101,6 +102,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             )
                           : const Text('Sign in'),
                     ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Use admin@university.edu to preview admin controls.',
+                      textAlign: TextAlign.center,
+                    )
                   ],
                 ),
               ),

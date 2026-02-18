@@ -6,35 +6,58 @@ Production-oriented scaffold for a university mobile application and secure back
 
 - Architecture overview and threat model: `docs/architecture.md`
 - Technology stack decision and security defaults: `docs/stack-decision.md`
-- Flutter mobile app scaffold with modular structure and secure token storage.
+- Flutter mobile app scaffold with modular feature structure and secure session handling.
 - FastAPI backend scaffold with JWT auth, RBAC, and audit logging.
 - PostgreSQL SQL migration scripts under `backend/migrations/`.
 
 ## Mobile App (Flutter)
 
-### Features scaffolded
-- Institutional information hub:
-  - Directory
-  - Campus map link
-  - Events
-  - Notices
-  - FAQs
-  - Emergency contacts
-- Student services hub:
-  - Profile
-  - Timetable
-  - Attendance
-  - Grades/results
-  - Fee status
-  - Library
-  - Certificates
+### Scaffold highlights
 
-### Run locally
+- Modular app structure by features (`auth`, `dashboard`, `institution`, `student`, `admin`, `profile`).
+- API client with request/response interceptor pipeline.
+- Secure token persistence using `flutter_secure_storage`.
+- Session expiry + automatic refresh flow.
+- Role-aware UI (admin actions hidden for non-admin users).
+- Public content cached safely using `shared_preferences`; student data cached minimally in-memory with short TTL.
+- Environment configuration (`dev` / `stage` / `prod`) via `--dart-define`.
+- Basic themed UI for all core screens.
+
+### Run instructions
+
+1. Install Flutter SDK and platform toolchains.
+2. Fetch packages:
 
 ```bash
 flutter pub get
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
 ```
+
+3. Run on Android emulator/device (dev):
+
+```bash
+flutter run \
+  --flavor dev \
+  --dart-define=APP_ENV=dev \
+  --dart-define=API_BASE_URL=http://10.0.2.2:8000
+```
+
+4. Run on iOS simulator/device (stage example):
+
+```bash
+flutter run \
+  -d ios \
+  --dart-define=APP_ENV=stage \
+  --dart-define=API_BASE_URL=https://stage-api.university.edu
+```
+
+5. Production build example:
+
+```bash
+flutter build apk --release --dart-define=APP_ENV=prod
+flutter build ios --release --dart-define=APP_ENV=prod
+```
+
+> Note: if flavors are not configured yet in native projects, omit `--flavor` and use only `--dart-define` values.
 
 ## Backend API (FastAPI)
 

@@ -1,12 +1,24 @@
+import 'dart:convert';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:login_app_page/app/core/models.dart';
 
 class SecureTokenStore {
   static const _storage = FlutterSecureStorage();
-  static const _tokenKey = 'auth_jwt_token';
+  static const _sessionKey = 'auth_session';
 
-  Future<void> save(String token) => _storage.write(key: _tokenKey, value: token);
+  Future<void> saveSession(SessionTokens session) {
+    return _storage.write(key: _sessionKey, value: jsonEncode(session.toJson()));
+  }
 
-  Future<String?> read() => _storage.read(key: _tokenKey);
+  Future<SessionTokens?> readSession() async {
+    final data = await _storage.read(key: _sessionKey);
+    if (data == null || data.isEmpty) {
+      return null;
+    }
 
-  Future<void> clear() => _storage.delete(key: _tokenKey);
+    return SessionTokens.fromJson(jsonDecode(data) as Map<String, dynamic>);
+  }
+
+  Future<void> clear() => _storage.delete(key: _sessionKey);
 }
