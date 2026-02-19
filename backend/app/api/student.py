@@ -24,13 +24,14 @@ def _get_profile_or_404(db: Session, student_id: int) -> StudentProfile:
     return profile
 
 
-@router.get('/me', response_model=StudentSummaryResponse)
-def get_my_profile(user: User = Depends(role_required({Role.student})), db: Session = Depends(get_db)):
-    profile = db.query(StudentProfile).filter(StudentProfile.user_id == user.id).first()
+def _get_profile_for_user_or_404(db: Session, user_id: int) -> StudentProfile:
+    profile = db.query(StudentProfile).filter(StudentProfile.user_id == user_id).first()
     if profile is None:
         raise HTTPException(status_code=404, detail='Student profile not found')
+    return profile
 
-    log_event(db, user.id, 'student.profile.read', 'student_profile', {'student_id': profile.id})
+
+def _build_student_summary(profile: StudentProfile, user: User) -> StudentSummaryResponse:
     return StudentSummaryResponse(
         full_name=user.full_name,
         roll_number=profile.roll_number,
@@ -40,19 +41,28 @@ def get_my_profile(user: User = Depends(role_required({Role.student})), db: Sess
     )
 
 
+def _ensure_student_can_access_profile(profile: StudentProfile, current_user: User, resource: str) -> None:
+    if current_user.role == Role.student and profile.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail=f'Students can only view their own {resource}')
+
+
+@router.get('/me', response_model=StudentSummaryResponse)
+def get_my_profile(user: User = Depends(role_required({Role.student})), db: Session = Depends(get_db)):
+    profile = _get_profile_for_user_or_404(db, user.id)
+
+    log_event(db, user.id, 'student.profile.read', 'student_profile', {'student_id': profile.id})
+    return _build_student_summary(profile, user)
+
+
 @router.get('/me/grades', response_model=StudentGradesResponse)
 def get_my_grades(user: User = Depends(role_required({Role.student})), db: Session = Depends(get_db)):
-    profile = db.query(StudentProfile).filter(StudentProfile.user_id == user.id).first()
-    if profile is None:
-        raise HTTPException(status_code=404, detail='Student profile not found')
+    profile = _get_profile_for_user_or_404(db, user.id)
     return get_student_grades(profile.id, user, db)
 
 
 @router.get('/me/timetable', response_model=StudentTimetableResponse)
 def get_my_timetable(user: User = Depends(role_required({Role.student})), db: Session = Depends(get_db)):
-    profile = db.query(StudentProfile).filter(StudentProfile.user_id == user.id).first()
-    if profile is None:
-        raise HTTPException(status_code=404, detail='Student profile not found')
+    profile = _get_profile_for_user_or_404(db, user.id)
     return get_student_timetable(profile.id, user, db)
 
 
@@ -75,13 +85,7 @@ def get_student_for_admin(
         'student_profile',
         {'student_id': profile.id, 'target_user_id': user.id},
     )
-    return StudentSummaryResponse(
-        full_name=user.full_name,
-        roll_number=profile.roll_number,
-        department=profile.department,
-        semester=profile.semester,
-        attendance_percentage=float(profile.attendance_percentage),
-    )
+    return _build_student_summary(profile, user)
 
 
 @router.get('/{student_id}/grades', response_model=StudentGradesResponse)
@@ -92,8 +96,7 @@ def get_student_grades(
 ):
     profile = _get_profile_or_404(db, student_id)
 
-    if current_user.role == Role.student and profile.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail='Students can only view their own grades')
+    _ensure_student_can_access_profile(profile, current_user, 'grades')
 
     grades = db.query(StudentGrade).filter(StudentGrade.student_id == student_id).all()
     log_event(
@@ -126,8 +129,7 @@ def get_student_timetable(
 ):
     profile = _get_profile_or_404(db, student_id)
 
-    if current_user.role == Role.student and profile.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail='Students can only view their own timetable')
+    _ensure_student_can_access_profile(profile, current_user, 'timetable')
 
     entries = (
         db.query(StudentTimetableEntry)
